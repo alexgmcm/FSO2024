@@ -1,7 +1,6 @@
-const Country = ({country}) => {
-console.log(Object.values(country.languages))
-const api_key = import.meta.env.VITE_WEATHER_KEY
+import Weather from "./Weather"
 
+const Country = ({country}) => {
 
 return (
 <>
@@ -12,6 +11,8 @@ area {country.area} <br/>
 <h2>languages</h2>
 <ul>{Object.values(country.languages).map((x,i) => <li key={i}>{x}</li>)}</ul>
 <img src={country.flags.png}/>
+<Weather country={country}/>
+
 </>
 )
 
