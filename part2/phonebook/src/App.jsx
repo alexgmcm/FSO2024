@@ -43,16 +43,22 @@ const App = () => {
     if (duplicate.length>0){
       const curPerson = duplicate[0]
       if(window.confirm(`${curPerson.name} is already in the phonebook, replace the old number with a new one?`)){
+        console.log(curPerson.id)
         personsService.update(curPerson.id, {id:curPerson.id, name: newName, number: newNumber}).then((res)=>{
           //console.log(res)
           setPersons(persons.filter(x => x.id!=res.data.id).concat(res.data))
         }).catch(err => {
-          console.log(err)
-          setNotification({message:`${curPerson.name} already deleted`,type:"error"})
-          setPersons(persons.filter(x => x.id!=curPerson.id))
-          setTimeout(()=>{
-            setNotification({})
-          },5000)
+          if (err.name==="TypeError"){
+            console.log(err.name)
+            displayNotification({message:`${curPerson.name} already deleted`,type:"error"})
+            setPersons(persons.filter(x => x.id!=curPerson.id)) // remove already deleted person
+          }
+          else{ 
+            const errmsg = err.response.data.error
+            console.log(errmsg)
+            displayNotification({message:errmsg,type:"error"})
+          }
+          
         })
         
       }
@@ -61,14 +67,17 @@ const App = () => {
       displayNotification({message:`${curPerson.name} modified`,type:"added"})
     }
     else {
-    setPersons(persons.concat({name: newName, number: newNumber}))
-    personsService.create({name: newName, number: newNumber})
-    displayNotification({message:`${newName} added`,type:"added"})
+      personsService.create({name: newName, number: newNumber}).then((res) => {
+      setPersons(persons.concat({name: newName, number: newNumber}))
+      displayNotification({message:`${newName} added`,type:"added"})
+    }).catch(err => {
+    const errmsg = err.response.data.error
+    console.log(errmsg)
+
+    displayNotification({message:errmsg,type:"error"})
     setNewName('')
     setNewNumber('')
-    
-
-
+    })
     }
   }
 
